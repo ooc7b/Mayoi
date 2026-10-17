@@ -101,6 +101,22 @@ needs a `## <version>` section here, or its build fails.
   and the `aiModel` setting picks another of Mon's models.
 - **Mayoi → Sign In…** is the new name of **Sign In to Sync Settings…**, as
   the account now does more than sync.
+- **herdr:** the herdr button beside the panel's terminal buttons lists the
+  terminals herdr runs for the folder, whichever workspace and tab they are
+  in, each named as herdr names it, and shows the one clicked in the panel,
+  as a terminal of its own, with herdr's own `terminal attach`, marked by
+  herdr's logo where a shell's terminal has a prompt. One the panel or a
+  tab already shows comes to the front, rather than being attached twice.
+  **Rename…** in the menu of that terminal, under the right button, names
+  it in herdr too, whose tab bar shows the name from then on, and the
+  button that takes it out of the panel, and the last item of that menu,
+  say **Detach Terminal**: herdr keeps it running there. **New Terminal**
+  under the list makes one in herdr first, in the workspace the folder
+  has there or in a new one. A remote folder runs it on its host. herdr
+  is no requirement: a machine without it, or a host without it, has the
+  menu say so. The whole of it is off until **View → Herdr Terminals**
+  asks for it: unchecked, the panel has no herdr button, and Mayoi looks
+  for nothing of herdr, runs nothing of it.
 
 ## 0.10.0
 

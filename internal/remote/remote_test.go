@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -334,4 +335,55 @@ func TestRefused(t *testing.T) {
 			t.Errorf("Refused(%q) = %v", stderr, got)
 		}
 	}
+}
+
+// TestTerminalArgv runs the command a terminal of a program in a remote
+// folder runs, here, as the host's shell would: the program is what the
+// terminal runs, not a shell, and it runs in the folder, with the folders
+// programs are installed in on its PATH.
+func TestTerminalArgv(t *testing.T) {
+	c := &Conn{Host: "me@box:2222"}
+	if argv := c.TerminalArgv("/home/me", nil); argv != nil {
+		t.Fatalf("a terminal with no program is %q", argv)
+	}
+	dir := filepath.Join(t.TempDir(), "a dir")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	argv := c.TerminalArgv(dir, []string{"pwd"})
+	if len(argv) < 3 || argv[0] != "ssh" {
+		t.Fatalf("the command is %q", argv)
+	}
+	if !slices.Contains(argv[:len(argv)-1], "-t") {
+		t.Errorf("the command asks for no terminal: %q", argv[:len(argv)-1])
+	}
+	if !slices.Contains(argv[:len(argv)-1], "2222") {
+		t.Errorf("the command names no port: %q", argv[:len(argv)-1])
+	}
+	if got, want := runHostShell(t, argv), dir; got != want {
+		// pwd tells the folder it is entered by its own spelling.
+		real, err := filepath.EvalSymlinks(want)
+		if err != nil || got != real {
+			t.Errorf("the program runs in %q, not %q", got, want)
+		}
+	}
+	out := runHostShell(t, c.TerminalArgv(dir, []string{"sh", "-c", `printf %s "$PATH"`}))
+	for _, want := range []string{"/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("PATH is %q, which has no %s", out, want)
+		}
+	}
+}
+
+// runHostShell runs the command of a terminal as the host's shell does.
+func runHostShell(t *testing.T, argv []string) string {
+	t.Helper()
+	if len(argv) == 0 {
+		t.Fatal("no command")
+	}
+	out, err := exec.Command("sh", "-c", argv[len(argv)-1]).CombinedOutput()
+	if err != nil {
+		t.Fatalf("the command failed: %v\n%s", err, out)
+	}
+	return strings.TrimSuffix(string(out), "\n")
 }

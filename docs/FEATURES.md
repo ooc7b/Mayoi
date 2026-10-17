@@ -346,6 +346,21 @@ On Windows and Linux the shell has the keys with Ctrl, which edit its line, exce
 Command Palette, the terminal and the sidebar toggles, Next and Previous Tab, Alt+1 to Alt+9 and zoom, and every
 Ctrl+Shift shortcut but Ctrl+Shift+C and Ctrl+Shift+V, the terminal's copy and paste, and those of the function keys.
 
+The herdr button beside the panel's terminal buttons shows what herdr runs for the folder. herdr keeps its terminals in
+a server of its own, so they outlive the window that showed them, and Mayoi reaches them with herdr's command line
+alone: the menu lists the terminals of the folder, whichever workspace and tab of herdr they are in, each under the name
+herdr gives it, and a click shows the one chosen in the panel, as a terminal of its own, where `herdr terminal attach`
+runs, so Ctrl+B Q there detaches and leaves it running. One the panel or a tab shows already comes to the front instead,
+rather than being attached twice. That terminal wears herdr's logo wherever the panel and the tab bar name it, where a
+shell's has a prompt. **New Terminal** at the end of the list makes one in herdr first, in the workspace the folder has
+there, or in a new one; with no herdr server running, that starts one. A folder on a host runs herdr there, over the
+connection. **Rename…** in the menu of such a terminal, under the pointer's right button, names it in herdr as well, whose
+own tab bar shows that name from then on. The button that takes such a terminal out of the panel, and the last item of its
+menu, say **Detach Terminal** rather than Kill Terminal: the terminal goes on running in herdr's server, and the panel only
+stops showing it. herdr is optional: without it, or without it on a host, the menu says so, and nothing else changes. The
+whole of it is off until **View → Herdr Terminals** is checked, so the panel has no button of herdr, and Mayoi looks for
+none of it, until you ask.
+
 ## Quick open
 
 ⌘P, or the search box in the title bar, opens a fuzzy file search with recent files first. In a Git work tree it lists

@@ -48,6 +48,7 @@ takes its default.
 | `terminalFontFamily`    | `""`          | Font names, separated by commas                             |                                                |
 | `terminalFontSize`      | `0`           | 0, or 9 to 28                                               |                                                |
 | `terminalCopyOnSelect`  | `true`        | `true`, `false`                                             |                                                |
+| `herdr`                 | `false`       | `true`, `false`                                             | **View → Herdr Terminals**                     |
 | `theme`                 | `""`          | `""` (Mayoi), `"matrix"`, `"claude"`, `"qoder"`             | **View → Theme**                               |
 | `appearance`            | `""`          | `""` (follow the system), `"light"`, `"dark"`               | **View → Theme**                               |
 | `sidebarRight`          | `false`       | `true`, `false`                                             | **View → Sidebar on Right**                    |
@@ -103,6 +104,9 @@ differ in width lines them up only roughly.
   as the folders and the pictures are this machine's.
 - **`terminalCopyOnSelect`** copies what you select in a terminal to the clipboard as you let go of the pointer,
   and what Select All selects. Changing it applies to the terminals already open.
+- **`herdr`** shows the panel's herdr button, which lists the terminals herdr runs for the folder and attaches one to a
+  terminal of Mayoi. Off until you ask for it, so Mayoi runs nothing of herdr, and looks for nothing of it, unasked. The
+  terminals of herdr already attached stay, as terminals of the panel.
 - **`autoSave`** saves a changed file a moment after you stop typing, and when you leave it.
 - **`wordWrap`** wraps long lines at the edge of the editor. **⌥Z** wraps or unwraps one tab only, until this
   setting changes.

@@ -426,9 +426,13 @@ func (c *Conn) live() (string, context.Context, error) {
 // login shell, which may not be a POSIX one.
 const launcher = `sh -c 'IFS= read -r n; eval "$(dd bs=1 count=$n 2>/dev/null)"'`
 
-// preamble starts every script: the folders programs are installed in,
-// which a shell that does not log in may lack.
-const preamble = `PATH="$PATH:$HOME/.local/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin"; export PATH
+// pathDirs are the folders programs are installed in, which a shell that
+// does not log in may lack.
+const pathDirs = `$PATH:$HOME/.local/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin`
+
+// preamble starts every script: the folders of pathDirs, and a locale
+// programs can be read in.
+const preamble = `PATH="` + pathDirs + `"; export PATH
 LC_ALL=C; export LC_ALL
 `
 
@@ -516,21 +520,46 @@ func (e *Error) Is(target error) bool {
 	return target == fs.ErrNotExist && strings.Contains(e.Stderr, "No such file or directory")
 }
 
-// TerminalCommand returns the ssh command of a terminal in dir on the
-// host, which signs in itself, in the terminal, when the connection is
-// not there.
-func (c *Conn) TerminalCommand(dir string) []string {
+// terminalSSH is the ssh of a terminal on the host, which signs in itself,
+// in the terminal, when the connection is not there.
+func (c *Conn) terminalSSH() ([]string, error) {
 	sock, err := c.socket()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	// No BatchMode: a terminal can ask for a password.
 	args := []string{"ssh", "-o", "ControlPath=" + sock, "-o", "ControlMaster=no", "-o", "LogLevel=ERROR",
 		"-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=3", "-t"}
-	args = append(args, hostArgs(c.Host)...)
+	return append(args, hostArgs(c.Host)...), nil
+}
+
+// TerminalCommand returns the ssh command of a terminal in dir on the
+// host, which runs the user's shell there.
+func (c *Conn) TerminalCommand(dir string) []string {
+	args, err := c.terminalSSH()
+	if err != nil {
+		return nil
+	}
 	// The login shell runs this: its quoting is that of most shells, and
 	// sh does the rest.
 	return append(args, "exec sh -c "+quote(`cd "$1" 2>/dev/null || cd; exec "${SHELL:-sh}" -l`)+" sh "+quote(dir))
+}
+
+// TerminalArgv returns the ssh command of a terminal in dir on the host
+// that runs argv rather than a shell, as the one that shows a terminal of
+// herdr there does. No shell logs in, so the folders of pathDirs are put
+// in PATH for the program, which may be in one of them.
+func (c *Conn) TerminalArgv(dir string, argv []string) []string {
+	args, err := c.terminalSSH()
+	if err != nil || len(argv) == 0 {
+		return nil
+	}
+	rest := []string{"sh", quote(dir)}
+	for _, a := range argv {
+		rest = append(rest, quote(a))
+	}
+	script := `PATH="` + pathDirs + `"; export PATH; cd "$1" 2>/dev/null || cd; shift; exec "$@"`
+	return append(args, "exec sh -c "+quote(script)+" "+strings.Join(rest, " "))
 }
 
 // sshError is what to say of an ssh that failed, by what it said.

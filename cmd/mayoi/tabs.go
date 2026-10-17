@@ -115,7 +115,7 @@ func (a *app) tabStrip(c *ui.Context, col *column) {
 							ui.Box(c.Key("line")).Absolute().Top(0).Left(0).Right(0).Height(2).Background(line).
 								Transition(ui.ElementTransition{Animation: &ui.Snappy, Match: tabLine{col.id}})
 						}
-						icon, tint := iconTerminal, p.muted
+						icon, tint := termIcon(t.term), p.muted
 						switch {
 						case t.diff != nil && t.diff.commit != nil:
 							icon, tint = iconCommit, p.accent
@@ -254,6 +254,11 @@ func (a *app) tabMenu(m *ui.Menu, col *column, t *colTab, closing **colTab) {
 		show(func() { a.moveTabBy(-1) })
 	}
 	if t.term != nil {
+		if a.settings.Herdr && t.term.herdrAt.tab != "" {
+			if m.Item(locales.RenameEllipsis()).Chosen() {
+				a.post(func() { a.renameHerdr(t.term) })
+			}
+		}
 		if m.Item(locales.TermMoveLockedRight()).Chosen() {
 			a.post(func() { a.terminalToLockedRight(t.term) })
 		}

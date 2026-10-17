@@ -104,6 +104,8 @@ func (a *app) commandOn(id string) bool {
 		return s.SidebarRight
 	case "git.blame":
 		return s.Blame
+	case "view.herdr":
+		return s.Herdr
 	case "view.appearance.system":
 		return s.Appearance == ""
 	case "view.theme.mayoi":

@@ -196,6 +196,8 @@ type app struct {
 	terms     []*session
 	panelTerm *session
 	nextTerm  int
+	// herdr is the panel's button of herdr's terminals, and what it found.
+	herdr herdrMenu
 	// termTheme is the theme of the settings the terminals have the colors
 	// of.
 	termTheme string

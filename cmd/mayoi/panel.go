@@ -23,8 +23,17 @@ type session struct {
 	term  *terminal.Terminal
 	title string
 	dir   string
-	view  ui.Handle // its view, which takes the keyboard
-	tab   *colTab   // the tab that shows it, nil for one of the panel
+	// argv is the program the terminal runs, nil for the shell of dir: a
+	// terminal that shows a terminal of herdr runs herdr's attach.
+	argv []string
+	// herdr marks a terminal that runs herdr, which wears its logo where
+	// that of a shell is a prompt, in the panel and in its tab, and
+	// herdrAt is the terminal of herdr it shows, which a rename names
+	// there.
+	herdr   bool
+	herdrAt herdrRef
+	view    ui.Handle // its view, which takes the keyboard
+	tab     *colTab   // the tab that shows it, nil for one of the panel
 	// lost is set while a terminal of a host waits for the connection
 	// that ended it, to start again.
 	lost bool
@@ -72,10 +81,20 @@ func (a *app) workDir() string {
 
 // startTerminal starts a terminal in dir, nil when it cannot.
 func (a *app) startTerminal(dir string) *session {
+	return a.startTerminalArgv(dir, nil, "")
+}
+
+// startTerminalArgv starts a terminal in dir that runs argv rather than
+// the shell, as the one that shows a terminal of herdr does, and calls it
+// title until its program says otherwise.
+func (a *app) startTerminalArgv(dir string, argv []string, title string) *session {
 	a.nextTerm++
-	s := &session{id: a.nextTerm, dir: dir, title: shellName()}
+	s := &session{id: a.nextTerm, dir: dir, argv: argv, title: shellName(), herdr: runsHerdr(argv)}
 	if c := sessionConn(s); c != nil {
 		s.title = c.Host
+	}
+	if title != "" {
+		s.title = title
 	}
 	term, err := a.spawnTerminal(s, dir)
 	if err != nil {
@@ -88,14 +107,20 @@ func (a *app) startTerminal(dir string) *session {
 }
 
 // spawnTerminal starts the program of a terminal in dir: the shell, of
-// the host in a remote folder.
+// the host in a remote folder, or the program the terminal runs.
 func (a *app) spawnTerminal(s *session, dir string) (*terminal.Terminal, error) {
 	light, dark := a.termThemes()
 	// In a remote folder, a shell of its host, over the connection.
 	var command []string
 	if c, rdir, ok := remote.Lookup(dir); ok {
-		command = c.TerminalCommand(rdir)
+		if len(s.argv) > 0 {
+			command = c.TerminalArgv(rdir, s.argv)
+		} else {
+			command = c.TerminalCommand(rdir)
+		}
 		dir, _ = os.UserHomeDir()
+	} else if len(s.argv) > 0 {
+		command = s.argv
 	}
 	// term is the terminal made, which OnExit tells from one that took
 	// its place.
@@ -164,15 +189,21 @@ func (a *app) spawnTerminal(s *session, dir string) (*terminal.Terminal, error) 
 func (a *app) newTerminal() { a.newTerminalIn(a.workDir()) }
 
 // newTerminalIn starts a terminal of the panel in dir and shows it.
-func (a *app) newTerminalIn(dir string) {
-	s := a.startTerminal(dir)
+func (a *app) newTerminalIn(dir string) { a.newTerminalInArgv(dir, nil, "") }
+
+// newTerminalInArgv starts a terminal of the panel in dir that runs argv
+// rather than the shell, as the one that shows a terminal of herdr does,
+// and shows it, titled title until its program says otherwise.
+func (a *app) newTerminalInArgv(dir string, argv []string, title string) *session {
+	s := a.startTerminalArgv(dir, argv, title)
 	if s == nil {
-		return
+		return nil
 	}
 	a.panelTerm = s
 	a.window.PanelOpen, a.window.TerminalOpen = true, true
 	a.settings.Changed()
 	a.focusTerminal()
+	return s
 }
 
 // newTerminalTab starts a terminal in dir in a new tab of a column, after
@@ -308,6 +339,7 @@ func (a *app) closeTerminals() {
 // hidePanel hides the panel, and gives the keyboard back to the column.
 func (a *app) hidePanel() {
 	a.window.PanelOpen = false
+	a.herdr.open = false
 	a.settings.Changed()
 	a.focusColumn()
 }
@@ -361,7 +393,9 @@ func (a *app) panel(c *ui.Context) {
 	width := box.Bounds().W
 	titled := a.panelSide() == "bottom" || width == 0 || width >= panelTitleW
 	box.Children(func() {
-		head := ui.Row(c).Height(panelHeadH).Padding(0, 8, 0, 14).Gap(4).AlignItems(ui.Center)
+		// The buttons keep three points apart: at four, the last of the
+		// six reaches past a panel dragged to its narrowest.
+		head := ui.Row(c).Height(panelHeadH).Padding(0, 8, 0, 14).Gap(3).AlignItems(ui.Center)
 		head.ContextMenu(a.panelMenu)
 		head.Children(func() {
 			if titled {
@@ -388,7 +422,7 @@ func (a *app) panel(c *ui.Context) {
 							chip.Background(p.hover)
 						}
 						chip.Children(func() {
-							ui.Icon(c, iconTerminal).FontSize(12).TextColor(p.muted)
+							ui.Icon(c, termIcon(s)).FontSize(12).TextColor(p.muted)
 							col := p.muted
 							if on {
 								col = p.text
@@ -400,13 +434,18 @@ func (a *app) panel(c *ui.Context) {
 							a.focusTerminal()
 						}
 						chip.ContextMenu(func(m *ui.Menu) {
+							if a.settings.Herdr && s.herdrAt.tab != "" {
+								if m.Item(locales.RenameEllipsis()).Chosen() {
+									a.post(func() { a.renameHerdr(s) })
+								}
+							}
 							if m.Item(locales.TermMoveLockedRight()).Chosen() {
 								a.post(func() { a.terminalToLockedRight(s) })
 							}
 							if m.Item(locales.TermMoveEditorArea()).Chosen() {
 								a.post(func() { a.terminalToColumn(s, a.column(), a.column().active+1) })
 							}
-							if m.Item(locales.TermKill()).Chosen() {
+							if m.Item(closeTermLabel(s)).Chosen() {
 								a.post(func() { a.removeTerminal(s) })
 							}
 						})
@@ -416,11 +455,14 @@ func (a *app) panel(c *ui.Context) {
 			if a.iconButton(c, iconPlus, a.withKey(locales.CmdViewNewTerminal(), "view.newTerminal"), false).Clicked() {
 				a.newTerminal()
 			}
+			if a.settings.Herdr {
+				a.herdrButton(c)
+			}
 			if s := a.panelTerm; s != nil {
 				if a.iconButton(c, iconToEditor, locales.TermMoveToEditor(), false).Clicked() {
 					a.post(func() { a.terminalToColumn(s, a.column(), a.column().active+1) })
 				}
-				if a.iconButton(c, iconTrash, locales.TermKill(), false).Clicked() {
+				if a.iconButton(c, closeTermIcon(s), closeTermLabel(s), false).Clicked() {
 					a.post(func() { a.removeTerminal(s) })
 				}
 			}

@@ -1927,6 +1927,16 @@ func (msgs Messages) CmdViewExplorer() string {
 	return Catalog.Format(msgs.locale, "cmdViewExplorer", nil)
 }
 
+// CmdViewHerdr says "Herdr Terminals"
+// in the language the app shows.
+func CmdViewHerdr() string { return In(i18n.Locale()).CmdViewHerdr() }
+
+// CmdViewHerdr says "Herdr Terminals"
+// in the language of msgs.
+func (msgs Messages) CmdViewHerdr() string {
+	return Catalog.Format(msgs.locale, "cmdViewHerdr", nil)
+}
+
 // CmdViewLocaleSystem says "System Language"
 // in the language the app shows.
 func CmdViewLocaleSystem() string { return In(i18n.Locale()).CmdViewLocaleSystem() }
@@ -3641,6 +3651,136 @@ func GroupUntracked() string { return In(i18n.Locale()).GroupUntracked() }
 // in the language of msgs.
 func (msgs Messages) GroupUntracked() string {
 	return Catalog.Format(msgs.locale, "groupUntracked", nil)
+}
+
+// HerdrAttachFailed says "Could not attach to the Herdr terminal: {err}"
+// in the language the app shows.
+func HerdrAttachFailed(err string) string { return In(i18n.Locale()).HerdrAttachFailed(err) }
+
+// HerdrAttachFailed says "Could not attach to the Herdr terminal: {err}"
+// in the language of msgs.
+func (msgs Messages) HerdrAttachFailed(err string) string {
+	return Catalog.Format(msgs.locale, "herdrAttachFailed", map[string]any{"err": err})
+}
+
+// HerdrCreateFailed says "Could not make a terminal in Herdr: {err}"
+// in the language the app shows.
+func HerdrCreateFailed(err string) string { return In(i18n.Locale()).HerdrCreateFailed(err) }
+
+// HerdrCreateFailed says "Could not make a terminal in Herdr: {err}"
+// in the language of msgs.
+func (msgs Messages) HerdrCreateFailed(err string) string {
+	return Catalog.Format(msgs.locale, "herdrCreateFailed", map[string]any{"err": err})
+}
+
+// HerdrFailed says "Could not reach Herdr: {err}"
+// in the language the app shows.
+func HerdrFailed(err string) string { return In(i18n.Locale()).HerdrFailed(err) }
+
+// HerdrFailed says "Could not reach Herdr: {err}"
+// in the language of msgs.
+func (msgs Messages) HerdrFailed(err string) string {
+	return Catalog.Format(msgs.locale, "herdrFailed", map[string]any{"err": err})
+}
+
+// HerdrLooking says "Looking for Herdr…"
+// in the language the app shows.
+func HerdrLooking() string { return In(i18n.Locale()).HerdrLooking() }
+
+// HerdrLooking says "Looking for Herdr…"
+// in the language of msgs.
+func (msgs Messages) HerdrLooking() string {
+	return Catalog.Format(msgs.locale, "herdrLooking", nil)
+}
+
+// HerdrMenu says "Herdr Terminals"
+// in the language the app shows.
+func HerdrMenu() string { return In(i18n.Locale()).HerdrMenu() }
+
+// HerdrMenu says "Herdr Terminals"
+// in the language of msgs.
+func (msgs Messages) HerdrMenu() string {
+	return Catalog.Format(msgs.locale, "herdrMenu", nil)
+}
+
+// HerdrMissing says "Herdr is not installed"
+// in the language the app shows.
+func HerdrMissing() string { return In(i18n.Locale()).HerdrMissing() }
+
+// HerdrMissing says "Herdr is not installed"
+// in the language of msgs.
+func (msgs Messages) HerdrMissing() string {
+	return Catalog.Format(msgs.locale, "herdrMissing", nil)
+}
+
+// HerdrMissingTip says "Install it with brew install herdr, or from herdr.dev."
+// in the language the app shows.
+func HerdrMissingTip() string { return In(i18n.Locale()).HerdrMissingTip() }
+
+// HerdrMissingTip says "Install it with brew install herdr, or from herdr.dev."
+// in the language of msgs.
+func (msgs Messages) HerdrMissingTip() string {
+	return Catalog.Format(msgs.locale, "herdrMissingTip", nil)
+}
+
+// HerdrNoServer says "No Herdr server is running"
+// in the language the app shows.
+func HerdrNoServer() string { return In(i18n.Locale()).HerdrNoServer() }
+
+// HerdrNoServer says "No Herdr server is running"
+// in the language of msgs.
+func (msgs Messages) HerdrNoServer() string {
+	return Catalog.Format(msgs.locale, "herdrNoServer", nil)
+}
+
+// HerdrNoServerTip says "New Terminal starts one."
+// in the language the app shows.
+func HerdrNoServerTip() string { return In(i18n.Locale()).HerdrNoServerTip() }
+
+// HerdrNoServerTip says "New Terminal starts one."
+// in the language of msgs.
+func (msgs Messages) HerdrNoServerTip() string {
+	return Catalog.Format(msgs.locale, "herdrNoServerTip", nil)
+}
+
+// HerdrNone says "No Herdr terminals in this folder"
+// in the language the app shows.
+func HerdrNone() string { return In(i18n.Locale()).HerdrNone() }
+
+// HerdrNone says "No Herdr terminals in this folder"
+// in the language of msgs.
+func (msgs Messages) HerdrNone() string {
+	return Catalog.Format(msgs.locale, "herdrNone", nil)
+}
+
+// HerdrNoneTip says "Herdr terminals keep running after the window that opened them closes."
+// in the language the app shows.
+func HerdrNoneTip() string { return In(i18n.Locale()).HerdrNoneTip() }
+
+// HerdrNoneTip says "Herdr terminals keep running after the window that opened them closes."
+// in the language of msgs.
+func (msgs Messages) HerdrNoneTip() string {
+	return Catalog.Format(msgs.locale, "herdrNoneTip", nil)
+}
+
+// HerdrRenameHint says "Herdr shows this name in its tab bar."
+// in the language the app shows.
+func HerdrRenameHint() string { return In(i18n.Locale()).HerdrRenameHint() }
+
+// HerdrRenameHint says "Herdr shows this name in its tab bar."
+// in the language of msgs.
+func (msgs Messages) HerdrRenameHint() string {
+	return Catalog.Format(msgs.locale, "herdrRenameHint", nil)
+}
+
+// HerdrRenameNeeded says "A name is needed"
+// in the language the app shows.
+func HerdrRenameNeeded() string { return In(i18n.Locale()).HerdrRenameNeeded() }
+
+// HerdrRenameNeeded says "A name is needed"
+// in the language of msgs.
+func (msgs Messages) HerdrRenameNeeded() string {
+	return Catalog.Format(msgs.locale, "herdrRenameNeeded", nil)
 }
 
 // HunkAdded says "Added"
@@ -8585,6 +8725,16 @@ func TabTerminal() string { return In(i18n.Locale()).TabTerminal() }
 // in the language of msgs.
 func (msgs Messages) TabTerminal() string {
 	return Catalog.Format(msgs.locale, "tabTerminal", nil)
+}
+
+// TermDetach says "Detach Terminal"
+// in the language the app shows.
+func TermDetach() string { return In(i18n.Locale()).TermDetach() }
+
+// TermDetach says "Detach Terminal"
+// in the language of msgs.
+func (msgs Messages) TermDetach() string {
+	return Catalog.Format(msgs.locale, "termDetach", nil)
 }
 
 // TermKill says "Kill Terminal"

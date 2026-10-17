@@ -101,6 +101,11 @@ type Prefs struct {
 	// TerminalCopyOnSelect copies what is selected in a terminal to the
 	// clipboard as the selection ends.
 	TerminalCopyOnSelect bool `json:"terminalCopyOnSelect"`
+	// Herdr shows the panel's button of herdr's terminals, which lists the
+	// terminals of the folder in herdr and attaches one to a terminal of
+	// Mayoi. Off until it is asked for, so that Mayoi runs nothing of
+	// herdr, and looks for nothing of it, without being asked.
+	Herdr bool `json:"herdr,omitempty"`
 	// AutoSave saves changed files a moment after an edit, and as the
 	// keyboard leaves them.
 	AutoSave bool `json:"autoSave"`
